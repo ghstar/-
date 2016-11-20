@@ -55,7 +55,8 @@ class DouBanSpider(object) :
             my_page = self.get_page(self.page)   #依次调用get_page方法取得my_page
             self.find_title(my_page)             #依次调用find_title方法对my_page的网页内容进行解析
             self.page += 1    
-            
+
+"""
 def main():
     print "**********start***********"
     my_spider = DouBanSpider()
@@ -63,6 +64,16 @@ def main():
     for item in my_spider.datas :
         print item
     print "豆瓣爬虫爬取结束..."
-    
+"""
+def main():
+    print "**********start***********"
+    my_spider = DouBanSpider()
+    my_spider.start_spider()
+    fw=open('/Users/enniu/Desktop/top250.txt','w')
+    for item in my_spider.datas :        #写入文件
+        fw.write(item + '\n')
+    fw.close()
+    print "豆瓣爬虫爬取结束..."
+
 if __name__ == '__main__':
     main()
