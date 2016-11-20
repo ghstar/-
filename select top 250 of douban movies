@@ -1,0 +1,68 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Nov 20 10:53:04 2016
+
+@author: enniu
+"""
+
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
+
+# 加载必要的包
+import string
+import urllib
+import urllib2
+import re
+
+class DouBanSpider(object) :
+    def __init__(self) :    #初始化
+        self.page = 1
+        self.cur_url = "http://movie.douban.com/top250?start={page}&filter=&type="
+        self.datas = []
+        self._top_num = 1
+        print "豆瓣电影爬虫准备就绪, 准备爬取数据..."
+
+    def get_page(self, cur_page) :   #获取当前页码的网站HTML
+        url = self.cur_url
+        try :
+            my_page = urllib2.urlopen(url.format(page = (cur_page - 1) * 25)).read().decode("utf-8")
+            #将utf-8编码转为Unicode？
+        except urllib2.URLError, e :
+            if hasattr(e, "code"):   #判断e对象是否有code属性或方法，返回bool值
+                print "The server couldn't fulfill the request."
+                print "Error code: %s" % e.code
+            elif hasattr(e, "reason"):
+                print "We failed to reach a server. Please check your url and read the Reason"
+                print "Reason: %s" % e.reason
+        return my_page
+        
+    def find_title(self, my_page) :  #将返回的整个网页，
+        temp_data = []
+        movie_items = re.findall(r'<span.*?class="title">(.*?)</span>', my_page, re.S)
+        #借助开发者工具的搜索，可以查看到标题统一在class="title"这样的形式里，部分电影有2个title，下方if进行处理
+        for index, item in enumerate(movie_items) :
+            if item.find("&nbsp") == -1 : #直接循环打印movie_items，有些电影名称会出现&nbsp
+                temp_data.append("Top" + str(self._top_num) + " " + item)
+                self._top_num += 1
+        self.datas.extend(temp_data)   #注意list.append和list.append的区别
+        
+    def start_spider(self) :
+        """
+        爬虫入口, 并控制爬虫抓取页面的范围
+        """
+        while self.page <= 4 :
+            my_page = self.get_page(self.page)   #依次调用get_page方法取得my_page
+            self.find_title(my_page)             #依次调用find_title方法对my_page的网页内容进行解析
+            self.page += 1    
+            
+def main():
+    print "**********start***********"
+    my_spider = DouBanSpider()
+    my_spider.start_spider()
+    for item in my_spider.datas :
+        print item
+    print "豆瓣爬虫爬取结束..."
+    
+if __name__ == '__main__':
+    main()
