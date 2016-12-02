@@ -1,0 +1,18 @@
+import MySQLdb
+conn=MySQLdb.connect(host="localhost",user="root",passwd="XX",db="yangjytest",port=3306,charset="utf8")
+conn.autocommit(True)
+cur=conn.cursor()     
+
+f=open('/Users/enniu/Downloads/fullstack/data/douban_movie_clean.txt')
+n=0
+for line in f:
+	n+=1
+	if n<=2:       #去掉第一行
+		continue
+	else:
+		line=line.strip().split('^')
+		cur.execute("insert into douban_movie (ID,title,rate,category,district,showtime)\
+			values (%s,%s,%s,%s,%s,%s)",[line[0],line[1],line[4],line[8],line[9],line[11]])
+f.close()
+cur.close()
+conn.close()
